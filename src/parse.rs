@@ -10,14 +10,14 @@ pub enum Command {
     BACK(i32),
     LEFT(i32),
     RIGHT(i32),
-    SETPENCOLOR(u32),
+    SETPENCOLOR(usize),
     TURN(i32),
     SETHEADING(i32),
     SETX(i32),
     SETY(i32),
 }
 
-/// After adding every command must add in here including type
+/// After adding every command must add in here
 /// returns Command enum associated with string iff value is correct
 /// otherwise returns None
 impl Command {
@@ -38,63 +38,63 @@ impl Command {
         }
       },
       "FORWARD" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::FORWARD(val))
         } else {
           None
         }
       },
       "BACK" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::BACK(val))
         } else {
           None
         }
       }
       "LEFT" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::LEFT(val))
         } else {
           None
         }
       }
       "RIGHT" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::RIGHT(val))
         } else {
           None
         }
       }
       "SETPENCOLOR" => {
-        if let Ok(val) = value.parse::<u32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::SETPENCOLOR(val))
         } else {
           None
         }
       }
       "TURN" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::TURN(val))
         } else {
           None
         }
       }
       "SETHEADING" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::SETHEADING(val))
         } else {
           None
         }
       }
       "SETX" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::SETX(val))
         } else {
           None
         }
       }
       "SETY" => {
-        if let Ok(val) = value.parse::<i32>() {
+        if let Ok(val) = value.parse::<_>() {
           Some(Command::SETY(val))
         } else {
           None
@@ -105,46 +105,56 @@ impl Command {
   }
 }
 
+/// Opens File and reads lines, then sends to parse_lines to further interpret
 pub fn parse_commands(file_path: &Path) -> Result<Vec<Command>, ()> {
   let file = fs::read_to_string(file_path);
   let mut commands: Vec<Command> = Vec::new();
   match file {
       Ok(lines_string) => {
-          let lines = lines_string.split("\n");
-          for (i, line) in lines.enumerate() {
-              let trimmed_line = line.trim();
-              if trimmed_line.starts_with("//") {
-                  continue;
-              }
-              let mut words = trimmed_line.split_whitespace();
-              if let Some(cmd) = words.next() {
-                  let formatted_cmd = cmd.to_ascii_uppercase();
-                  match formatted_cmd.as_str() {
-                      "PENUP" => parse_command(formatted_cmd.as_str(), 0, &mut words, &mut commands, i + 1),
-                      "PENDOWN" => parse_command(formatted_cmd.as_str(), 0, &mut words, &mut commands, i + 1),
-                      "FORWARD" => parse_command(formatted_cmd.as_str(), 1, &mut words, &mut commands, i + 1),
-                      "BACK" => parse_command(formatted_cmd.as_str(), 1, &mut words, &mut commands, i + 1),
-                      "LEFT" => parse_command(formatted_cmd.as_str(), 1, &mut words, &mut commands, i + 1),
-                      "RIGHT" => parse_command(formatted_cmd.as_str(), 1, &mut words, &mut commands, i + 1),
-                      "SETPENCOLOR" => parse_command(formatted_cmd.as_str(), 1, &mut words, &mut commands, i + 1),
-                      "TURN" => parse_command(formatted_cmd.as_str(),1,  &mut words, &mut commands, i + 1),
-                      "SETHEADING" => parse_command(formatted_cmd.as_str(),1,  &mut words, &mut commands, i + 1),
-                      "SETX" => parse_command(formatted_cmd.as_str(), 1, &mut words, &mut commands, i + 1),
-                      "SETY" => parse_command(formatted_cmd.as_str(), 1, &mut words, &mut commands, i + 1),
-                      _ => {
-                          exit_with_error(i + 1, format!("Error: Unrecognised command: {cmd}"));
-                      }
-                  }
-              }
-          }
+          let lines: std::str::Split<'_, &str> = lines_string.split("\n");
+          parse_lines(lines, &mut commands);
+          
       },
       Err(e) => {
-          print!("{e}")
+          println!("{e}")
       }
   }
   Ok(commands)
 }
 
+/// alters commands: Vec.
+/// takes raw lines from file and filters out comments and trims whitespace on either end
+/// Must add string match when adding new command
+fn parse_lines(lines: std::str::Split<'_, &str>, commands: &mut Vec<Command>) {
+  for (i, line) in lines.enumerate() {
+    let trimmed_line = line.trim();
+    if trimmed_line.starts_with("//") {
+        continue;
+    }
+    let mut words = trimmed_line.split_whitespace();
+    if let Some(cmd) = words.next() {
+        let formatted_cmd = cmd.to_ascii_uppercase();
+        match formatted_cmd.as_str() {
+            "PENUP" => parse_command(formatted_cmd.as_str(), 0, &mut words, commands, i + 1),
+            "PENDOWN" => parse_command(formatted_cmd.as_str(), 0, &mut words, commands, i + 1),
+            "FORWARD" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            "BACK" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            "LEFT" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            "RIGHT" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            "SETPENCOLOR" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            "TURN" => parse_command(formatted_cmd.as_str(),1,  &mut words, commands, i + 1),
+            "SETHEADING" => parse_command(formatted_cmd.as_str(),1,  &mut words, commands, i + 1),
+            "SETX" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            "SETY" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            _ => {
+                exit_with_error(i + 1, format!("Error: Unrecognised command: {cmd}"));
+            }
+        }
+    }
+}
+}
+
+/// Handles errors when reading individual command and pushes only successful cases to commands
 fn parse_command(cmd: &str, arg_size: usize,  words: &mut SplitWhitespace<'_>, commands: &mut Vec<Command>, line_number: usize) {
   let remaining_args: Vec<&str> = words.collect();
   if remaining_args.len() != arg_size {

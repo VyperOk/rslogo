@@ -1,8 +1,10 @@
 use clap::Parser;
-use parse::{parse_commands, Command};
+use execute::execute_commands;
+use parse::parse_commands;
 use unsvg::Image;
 mod utils;
 mod parse;
+mod execute;
 
 /// A simple program to parse four arguments using clap.
 #[derive(Parser)]
@@ -31,10 +33,10 @@ fn main() -> Result<(), ()> {
     let height = args.height;
     let width = args.width;
 
-    let image = Image::new(width, height);
+    let mut image = Image::new(width, height);
 
     let commands = parse_commands(&file_path)?;
-    execute_commands(&commands, &image); 
+    execute_commands(&commands, &mut image); 
     match image_path.extension().and_then(|s| s.to_str()) {
         Some("svg") => {
             let res = image.save_svg(&image_path);
@@ -57,24 +59,4 @@ fn main() -> Result<(), ()> {
     }
 
     Ok(())
-}
-
-
-
-fn execute_commands(commands: &[Command], image: &Image) {
-    for command in commands {
-        match command {
-            Command::PENUP => println!("PENUP"),
-            Command::PENDOWN => println!("PENDOWN"),
-            Command::FORWARD(arg) => println!("FORWARD({arg})"),
-            Command::BACK(arg) => println!("BACK({arg})"),
-            Command::LEFT(arg) => println!("LEFT({arg})"),
-            Command::RIGHT(arg) => println!("RIGHT({arg})"),
-            Command::SETPENCOLOR(arg) => println!("SETPENCOLOR({arg})"),
-            Command::TURN(arg) => println!("TURN({arg})"),
-            Command::SETHEADING(arg) => println!("SETHEADING({arg})"),
-            Command::SETX(arg) => println!("SETX({arg})"),
-            Command::SETY(arg) => println!("SETY({arg})"),
-        }
-    }
 }
