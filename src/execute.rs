@@ -28,6 +28,7 @@ impl Executable for Command {
       Command::SETHEADING(value) => turtle.heading = *value,
       Command::SETX(value) => turtle.pos_x = *value,
       Command::SETY(value) => turtle.pos_y = *value,
+      _ => (),
     }
   }
 }
