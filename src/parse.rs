@@ -17,89 +17,168 @@ pub enum Command {
     SETY(i32),
 }
 
+pub enum Expression {
+  Value(Value),
+  Variable(String),
+}
+
+pub enum Value {
+  Integer(i32),
+  Unsigned(usize),
+}
+
 /// After adding every command must add in here
 /// returns Command enum associated with string iff value is correct
-/// otherwise returns None
+/// otherwise returns None 
+
+// need to change value to array
 impl Command {
-  fn from_str(cmd: &str, value: &str) -> Option<Command> {
+  fn from_str(cmd: &str, args: Vec<&str>) -> Option<Command> {
     match cmd {
       "PENUP" => {
-        if value.is_empty() {
+        if args.is_empty() {
           Some(Command::PENUP)
         } else {
           None
         }
       }, 
       "PENDOWN" => {
-        if value.is_empty() {
+        if args.is_empty() {
           Some(Command::PENDOWN)
         } else {
           None
         }
       },
       "FORWARD" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::FORWARD(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::FORWARD(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       },
       "BACK" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::BACK(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::BACK(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       }
       "LEFT" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::LEFT(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::LEFT(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       }
       "RIGHT" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::RIGHT(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::RIGHT(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       }
       "SETPENCOLOR" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::SETPENCOLOR(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::SETPENCOLOR(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       }
       "TURN" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::TURN(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::TURN(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       }
       "SETHEADING" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::SETHEADING(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::SETHEADING(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       }
       "SETX" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::SETX(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::SETX(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
       }
       "SETY" => {
-        if let Ok(val) = value.parse::<_>() {
-          Some(Command::SETY(val))
+        if args.len() == 1 {
+          if let Some(value) = args.get(0) {
+            match value.parse::<_>() {
+              Ok(val) => Some(Command::SETY(val)),
+              Err(_) => None
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
-      }
+      },
+      // "MAKE" => {
+      //   println!("args: {}", args);
+      //   Some(Command::MAKE(()))
+      // }
       _ => None
     }
   }
@@ -146,6 +225,7 @@ fn parse_lines(lines: std::str::Split<'_, &str>, commands: &mut Vec<Command>) {
             "SETHEADING" => parse_command(formatted_cmd.as_str(),1,  &mut words, commands, i + 1),
             "SETX" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
             "SETY" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
+            "MAKE" => parse_command(formatted_cmd.as_str(), 2, &mut words, commands, i + 1),
             _ => {
                 exit_with_error(i + 1, format!("Error: Unrecognised command: {cmd}"));
             }
@@ -160,10 +240,11 @@ fn parse_command(cmd: &str, arg_size: usize,  words: &mut SplitWhitespace<'_>, c
   if remaining_args.len() != arg_size {
     exit_with_error(line_number, format!("Error: {} command has an invalid amount of arguments. Received {} arguments, expected {}", cmd, remaining_args.len(), arg_size));
   }
+  // This could be my arg validation
+  for arg in remaining_args.clone() {
+    println!("{arg}");
+  }
   if let Some(arg) = remaining_args.get(0) {
-    if arg_size == 0 {
-      exit_with_error(line_number, format!("Error: {} command should not have any arguments", cmd));
-    }
     if arg.len() > 1 {
       if arg.starts_with('"') {
         match Command::from_str(cmd, &arg[1..]) {
@@ -178,7 +259,7 @@ fn parse_command(cmd: &str, arg_size: usize,  words: &mut SplitWhitespace<'_>, c
     }
   } else {
     if arg_size == 0 {
-      match Command::from_str(cmd, "") {
+      match Command::from_str(cmd, Vec::new()) {
         Some(result) => commands.push(result),
         None => exit_with_error(line_number, format!("Error: '{}' command somehow got here even though there is no arg and there should be no arg", cmd)),
       }
