@@ -86,7 +86,19 @@ impl Executable for Command {
           }
         }
       },
-      // _ => (),
+        Command::AddAssign((name, value)) => {
+          if let Some(validated_name) =  get_value_from_string::<String>(turtle, name.to_string()) {
+            if let Some(validated_value) = get_value_from_string::<i32>(turtle, value.to_string()) {
+              if let Some(existing_variable) = turtle.variables.iter_mut().find(|v| v.name == validated_name) {
+                if let Ok(curr_value) = existing_variable.value.parse::<i32>() {
+                  existing_variable.value = (curr_value + validated_value).to_string()
+                } else {
+                  exit_with_error(format!("Error: cannot add parse variable value to integer"));
+                }
+              }
+            }
+          }
+        },
     }
   }
 }
@@ -112,7 +124,7 @@ fn get_value_from_string<T: std::str::FromStr>(turtle: &mut Turtle, str: String)
                 Err(_) => exit_with_error(format!("Error: unable to parse value {}", str)),
               }
             } else {
-              return None;
+              exit_with_error(format!("Error: Variable not found"));
             }
           }
         },

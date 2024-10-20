@@ -16,6 +16,7 @@ pub enum Command {
     SetX(String),
     SetY(String),
     Make((String, String)),
+    AddAssign((String, String)),
 }
 
 /// After adding every command must add in here
@@ -50,9 +51,8 @@ impl Command {
       "SETHEADING" => args.first().map(|value| Command::SetHeading(value.clone())),
       "SETX" => args.first().map(|value| Command::SetX(value.clone())),
       "SETY" => args.first().map(|value| Command::SetY(value.clone())),
-      "MAKE" => {
-        Some(Command::Make((args[0].clone(), args[1].clone())))
-      },
+      "MAKE" => Some(Command::Make((args[0].clone(), args[1].clone()))),
+      "ADDASSIGN" => Some(Command::AddAssign((args[0].clone(), args[1].clone()))),
       _ => None
     }
   }
@@ -99,6 +99,7 @@ fn parse_lines(lines: std::str::Split<'_, &str>, commands: &mut Vec<Command>) {
             "SETX" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
             "SETY" => parse_command(formatted_cmd.as_str(), 1, &mut words, commands, i + 1),
             "MAKE" => parse_command(formatted_cmd.as_str(), 2, &mut words, commands, i + 1),
+            "ADDASSIGN" => parse_command(formatted_cmd.as_str(), 2, &mut words, commands, i + 1),
             _ => {
                 exit_with_error(format!("Line {}: Error: Unrecognised command: {cmd}", i + 1));
             }
