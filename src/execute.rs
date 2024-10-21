@@ -131,7 +131,7 @@ impl Command {
                     };
                     turtle.procedures.push(procedure);
                 } else {
-                    exit_with_error(format!("Evaluation failed in procedure argument"));
+                    exit_with_error("Evaluation failed in procedure argument".to_string());
                 }
             }
             Command::Procedure((name, args)) => {
@@ -157,7 +157,7 @@ impl Command {
                                 exit_with_error(format!(
                                     "Error: Unable to parse args in procedure '{name}'"
                                 ));
-                                return "".to_string();
+                                "".to_string()
                             }
                         })
                         .collect::<Vec<String>>();

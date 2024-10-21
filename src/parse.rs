@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, fmt::format, fs, path::Path, str::SplitWhitespace};
+use std::{collections::VecDeque, fs, path::Path, str::SplitWhitespace};
 
 use crate::utils::{exit_with_error, is_valid_value, Command, Expression};
 
