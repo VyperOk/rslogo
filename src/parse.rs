@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, fs, path::Path, str::SplitWhitespace};
 
-use crate::utils::{exit_with_error, is_valid_value, Command, Expression};
+use crate::utils::{exit_with_error, Command, Expression};
 
 /// Opens File and reads lines, then sends to parse_lines to further interpret
 pub fn parse_commands(file_path: &Path) -> Result<Vec<Command>, ()> {
@@ -37,134 +37,66 @@ fn parse_lines(
             let mut words = trimmed_line.split_whitespace();
             if let Some(cmd) = words.next() {
                 let formatted_cmd = cmd.to_ascii_uppercase();
+                let mut args: Vec<Expression> = Vec::new();
                 match formatted_cmd.as_str() {
                     "PENUP" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(0), &mut words, &mut args);
                         commands.push(Command::PenUp);
                     }
                     "PENDOWN" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(0), &mut words, &mut args);
                         commands.push(Command::PenDown);
                     }
                     "FORWARD" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::Forward(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::Forward(args[0].clone()));
                     }
                     "BACK" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::Back(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::Back(args[0].clone()));
                     }
                     "LEFT" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::Left(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::Left(args[0].clone()));
                     }
                     "RIGHT" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::Right(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::Right(args[0].clone()));
                     }
                     "SETPENCOLOR" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::SetPenColor(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::SetPenColor(args[0].clone()));
                     }
                     "TURN" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::Turn(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::Turn(args[0].clone()));
                     }
                     "SETHEADING" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::SetHeading(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::SetHeading(args[0].clone()));
                     }
                     "SETX" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::SetX(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::SetX(args[0].clone()));
                     }
                     "SETY" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(1), &mut words, &mut args);
-                        match &args[0] {
-                            Expression::Value(value) => {
-                                commands.push(Command::SetY(value.to_string()))
-                            }
-                            _ => (),
-                        }
+                        commands.push(Command::SetY(args[0].clone()));
                     }
                     "MAKE" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(2), &mut words, &mut args);
-                        if let Expression::Value(arg1) = &args[0] {
-                            if let Expression::Value(arg2) = &args[1] {
-                                commands.push(Command::Make((arg1.to_string(), arg2.to_string())));
-                            }
-                        }
+                        commands.push(Command::Make((args[0].clone(), args[1].clone())));
                     }
                     "ADDASSIGN" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(2), &mut words, &mut args);
-                        if let Expression::Value(arg1) = &args[0] {
-                            if let Expression::Value(arg2) = &args[1] {
-                                commands
-                                    .push(Command::AddAssign((arg1.to_string(), arg2.to_string())));
-                            }
-                        }
+                        commands.push(Command::AddAssign((args[0].clone(), args[1].clone())));
                     }
                     "]" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), Some(0), &mut words, &mut args);
                         *expected_braces -= 1;
                         return i + 1;
                     }
                     "IF" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), None, &mut words, &mut args);
                         let mut if_commands = Vec::new();
                         *expected_braces += 1;
@@ -173,7 +105,6 @@ fn parse_lines(
                         commands.push(Command::If((args[0].clone(), if_commands)));
                     }
                     "WHILE" => {
-                        let mut args: Vec<_> = Vec::new();
                         get_args(formatted_cmd.as_str(), None, &mut words, &mut args);
                         let mut if_commands = Vec::new();
                         *expected_braces += 1;
@@ -209,15 +140,16 @@ fn get_args(
         // Handles case where there is a fixed number of arguments for the command
         Some(arg_count) => {
             // Checks if there is the correct amount of args
-            if remaining_args.len() != arg_count {
-                exit_with_error(format!("Error: {} command has an invalid amount of arguments. Received {} arguments, expected {}", cmd, remaining_args.len(), arg_count));
-            }
-            for arg in remaining_args {
-                if is_valid_value(arg) {
-                    args.push(Expression::Value(arg.to_string()));
-                } else {
-                    exit_with_error(format!("Error: '{}' command invalid argument", cmd));
+            let mut tokens = &mut VecDeque::from(remaining_args);
+            let mut i: usize = 0;
+            while i < arg_count {
+                if let Some(expression) = Expression::from_tokens(&mut tokens) {
+                    args.push(expression);
                 }
+                i = i + 1;
+            }
+            if args.len() + tokens.len() != arg_count {
+                exit_with_error(format!("Error: {} command has an invalid amount of arguments. Received {} arguments, expected {}", cmd, args.len() + tokens.len(), arg_count));
             }
         }
         // Handles case where there is not a set number of arguments for the command

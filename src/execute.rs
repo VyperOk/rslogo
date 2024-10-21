@@ -9,29 +9,28 @@ impl Command {
         match self {
             Command::PenUp => turtle.pen_down = false,
             Command::PenDown => turtle.pen_down = true,
-            Command::Forward(value) => {
-                if let Some(length) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::Forward(expression) => {
+                if let Some(length) = evaluate_expression::<i32>(turtle, expression) {
                     pen_move(image, turtle, turtle.heading, length);
                 }
             }
-            Command::Back(value) => {
-                if let Some(length) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::Back(expression) => {
+                if let Some(length) = evaluate_expression::<i32>(turtle, expression) {
                     pen_move(image, turtle, turtle.heading + 180, length);
                 }
             }
-            Command::Left(value) => {
-                if let Some(length) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::Left(expression) => {
+                if let Some(length) = evaluate_expression::<i32>(turtle, expression) {
                     pen_move(image, turtle, turtle.heading - 90, length);
                 }
             }
-            Command::Right(value) => {
-                if let Some(length) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::Right(expression) => {
+                if let Some(length) = evaluate_expression::<i32>(turtle, expression) {
                     pen_move(image, turtle, turtle.heading + 90, length);
                 }
             }
-            Command::SetPenColor(value) => {
-                if let Some(color_index) = get_value_from_string::<usize>(turtle, value.to_string())
-                {
+            Command::SetPenColor(expression) => {
+                if let Some(color_index) = evaluate_expression::<usize>(turtle, expression) {
                     if color_index < COLORS.len() {
                         turtle.color = COLORS[color_index];
                     } else {
@@ -43,33 +42,29 @@ impl Command {
                     }
                 }
             }
-            Command::Turn(value) => {
-                if let Some(degrees) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::Turn(expression) => {
+                if let Some(degrees) = evaluate_expression::<i32>(turtle, expression) {
                     turtle.heading += degrees;
                 }
             }
-            Command::SetHeading(value) => {
-                if let Some(degrees) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::SetHeading(expression) => {
+                if let Some(degrees) = evaluate_expression::<i32>(turtle, expression) {
                     turtle.heading = degrees;
                 }
             }
-            Command::SetX(value) => {
-                if let Some(x) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::SetX(expression) => {
+                if let Some(x) = evaluate_expression::<i32>(turtle, expression) {
                     turtle.pos_x = x;
                 }
             }
-            Command::SetY(value) => {
-                if let Some(y) = get_value_from_string::<i32>(turtle, value.to_string()) {
+            Command::SetY(expression) => {
+                if let Some(y) = evaluate_expression::<i32>(turtle, expression) {
                     turtle.pos_y = y;
                 }
             }
             Command::Make((name, value)) => {
-                if let Some(validated_name) =
-                    get_value_from_string::<String>(turtle, name.to_string())
-                {
-                    if let Some(validated_value) =
-                        get_value_from_string::<String>(turtle, value.to_string())
-                    {
+                if let Some(validated_name) = evaluate_expression::<String>(turtle, name) {
+                    if let Some(validated_value) = evaluate_expression::<String>(turtle, value) {
                         if let Some(existing_variable) = turtle
                             .variables
                             .iter_mut()
@@ -86,12 +81,8 @@ impl Command {
                 }
             }
             Command::AddAssign((name, value)) => {
-                if let Some(validated_name) =
-                    get_value_from_string::<String>(turtle, name.to_string())
-                {
-                    if let Some(validated_value) =
-                        get_value_from_string::<i32>(turtle, value.to_string())
-                    {
+                if let Some(validated_name) = evaluate_expression::<String>(turtle, name) {
+                    if let Some(validated_value) = evaluate_expression::<i32>(turtle, value) {
                         if let Some(existing_variable) = turtle
                             .variables
                             .iter_mut()
@@ -109,15 +100,15 @@ impl Command {
                 }
             }
             Command::If((expression, commands)) => {
-                if let Some(is_true) = evaluate_expression::<String>(turtle, expression.clone()) {
-                    if is_true != "0" {
+                if let Some(is_true) = evaluate_expression::<bool>(turtle, expression) {
+                    if is_true {
                         execute_commands(turtle, commands, image);
                     }
                 }
             }
             Command::While((expression, commands)) => loop {
-                if let Some(is_true) = evaluate_expression::<String>(turtle, expression.clone()) {
-                    if is_true != "0" {
+                if let Some(is_true) = evaluate_expression::<bool>(turtle, expression) {
+                    if is_true {
                         execute_commands(turtle, commands, image);
                     } else {
                         break;
@@ -128,23 +119,72 @@ impl Command {
     }
 }
 
-fn evaluate_expression<T: std::str::FromStr + PartialEq>(
-    turtle: &mut Turtle,
-    expression: Expression,
-) -> Option<T> {
+fn evaluate_expression<T>(turtle: &mut Turtle, expression: &Expression) -> Option<T>
+where
+    T: std::str::FromStr + PartialEq + PartialOrd,
+{
     match expression {
         Expression::Eq([left, right]) => {
-            let left = evaluate_expression::<T>(turtle, *left)?;
-            let right = evaluate_expression::<T>(turtle, *right)?;
+            let left = evaluate_expression::<String>(turtle, left)?;
+            let right = evaluate_expression::<String>(turtle, right)?;
             convert_bool_to_t::<T>(left == right)
         }
         Expression::Ne([left, right]) => {
-            let left = evaluate_expression::<T>(turtle, *left)?;
-            let right = evaluate_expression::<T>(turtle, *right)?;
+            let left = evaluate_expression::<String>(turtle, left)?;
+            let right = evaluate_expression::<String>(turtle, right)?;
             convert_bool_to_t::<T>(left != right)
         }
+        Expression::Gt([left, right]) => {
+            let left = evaluate_expression::<i32>(turtle, left)?;
+            let right = evaluate_expression::<i32>(turtle, right)?;
+            convert_bool_to_t::<T>(left > right)
+        }
+        Expression::Lt([left, right]) => {
+            let left = evaluate_expression::<i32>(turtle, left)?;
+            let right = evaluate_expression::<i32>(turtle, right)?;
+            convert_bool_to_t::<T>(left < right)
+        }
+        Expression::And([left, right]) => {
+            let left = evaluate_expression::<bool>(turtle, left)?;
+            let right = evaluate_expression::<bool>(turtle, right)?;
+            convert_bool_to_t::<T>(left && right)
+        }
+        Expression::Or([left, right]) => {
+            let left = evaluate_expression::<bool>(turtle, left)?;
+            let right = evaluate_expression::<bool>(turtle, right)?;
+            convert_bool_to_t::<T>(left || right)
+        }
+        Expression::Add([left, right]) => {
+            let left = evaluate_expression::<i32>(turtle, left)?;
+            let right = evaluate_expression::<i32>(turtle, right)?;
+            let sum = left + right;
+            T::from_str(&sum.to_string()).ok()
+        }
+        Expression::Subtract([left, right]) => {
+            let left = evaluate_expression::<i32>(turtle, left)?;
+            let right = evaluate_expression::<i32>(turtle, right)?;
+            let difference = left - right;
+            T::from_str(&difference.to_string()).ok()
+        }
+        Expression::Multiply([left, right]) => {
+            let left = evaluate_expression::<i32>(turtle, left)?;
+            let right = evaluate_expression::<i32>(turtle, right)?;
+            let product = left * right;
+            T::from_str(&product.to_string()).ok()
+        }
+        Expression::Divide([left, right]) => {
+            let left = evaluate_expression::<i32>(turtle, left)?;
+            let right = evaluate_expression::<i32>(turtle, right)?;
+            if right != 0 {
+                let quotient = left / right;
+                T::from_str(&quotient.to_string()).ok()
+            } else {
+                exit_with_error(format!("Error: cannot divide by 0"));
+                None
+            }
+        }
         Expression::Value(str) => {
-            if let Some(value) = get_value_from_string::<T>(turtle, str) {
+            if let Some(value) = get_value_from_string::<T>(turtle, str.clone()) {
                 Some(value)
             } else {
                 exit_with_error(format!("Error: idk how you got here"));
@@ -155,7 +195,7 @@ fn evaluate_expression<T: std::str::FromStr + PartialEq>(
 }
 
 fn convert_bool_to_t<T: std::str::FromStr>(value: bool) -> Option<T> {
-    T::from_str(if value { "1" } else { "0" }).ok()
+    T::from_str(if value { "true" } else { "false" }).ok()
 }
 
 fn get_value_from_string<T: std::str::FromStr>(turtle: &mut Turtle, str: String) -> Option<T> {

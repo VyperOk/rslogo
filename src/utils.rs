@@ -25,17 +25,17 @@ pub struct Variable {
 pub enum Command {
     PenUp,
     PenDown,
-    Forward(String),
-    Back(String),
-    Left(String),
-    Right(String),
-    SetPenColor(String),
-    Turn(String),
-    SetHeading(String),
-    SetX(String),
-    SetY(String),
-    Make((String, String)),
-    AddAssign((String, String)),
+    Forward(Expression),
+    Back(Expression),
+    Left(Expression),
+    Right(Expression),
+    SetPenColor(Expression),
+    Turn(Expression),
+    SetHeading(Expression),
+    SetX(Expression),
+    SetY(Expression),
+    Make((Expression, Expression)),
+    AddAssign((Expression, Expression)),
     If((Expression, Vec<Command>)),
     While((Expression, Vec<Command>)),
 }
@@ -44,6 +44,14 @@ pub enum Command {
 pub enum Expression {
     Eq([Box<Expression>; 2]),
     Ne([Box<Expression>; 2]),
+    Gt([Box<Expression>; 2]),
+    Lt([Box<Expression>; 2]),
+    And([Box<Expression>; 2]),
+    Or([Box<Expression>; 2]),
+    Add([Box<Expression>; 2]),
+    Subtract([Box<Expression>; 2]),
+    Multiply([Box<Expression>; 2]),
+    Divide([Box<Expression>; 2]),
     Value(String),
 }
 
@@ -60,6 +68,46 @@ impl Expression {
                     let left = Expression::from_tokens(tokens)?;
                     let right = Expression::from_tokens(tokens)?;
                     Some(Expression::Ne([Box::new(left), Box::new(right)]))
+                }
+                "GT" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::Gt([Box::new(left), Box::new(right)]))
+                }
+                "LT" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::Lt([Box::new(left), Box::new(right)]))
+                }
+                "AND" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::And([Box::new(left), Box::new(right)]))
+                }
+                "OR" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::Or([Box::new(left), Box::new(right)]))
+                }
+                "+" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::Add([Box::new(left), Box::new(right)]))
+                }
+                "-" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::Subtract([Box::new(left), Box::new(right)]))
+                }
+                "*" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::Multiply([Box::new(left), Box::new(right)]))
+                }
+                "/" => {
+                    let left = Expression::from_tokens(tokens)?;
+                    let right = Expression::from_tokens(tokens)?;
+                    Some(Expression::Divide([Box::new(left), Box::new(right)]))
                 }
                 _ => {
                     if is_valid_value(token) {
