@@ -1,7 +1,7 @@
 use unsvg::{get_end_coordinates, Image, COLORS};
 
 use crate::utils::{
-    exit_with_error, Command, Expression, Turtle, Variable, QUERIES, VALUE_PREFIXES,
+    exit_with_error, Command, Expression, Procedure, Turtle, Variable, QUERIES, VALUE_PREFIXES,
 };
 
 impl Command {
@@ -115,6 +115,65 @@ impl Command {
                     }
                 }
             },
+            Command::To((name, args, commands)) => {
+                if let Ok(arg_strings) = args
+                    .iter()
+                    .map(|arg| {
+                        evaluate_expression::<String>(turtle, arg)
+                            .ok_or_else(|| "Evaluation failed in procedure argument".to_string())
+                    })
+                    .collect::<Result<Vec<String>, String>>()
+                {
+                    let procedure = Procedure {
+                        name: name.to_string(),
+                        args: arg_strings,
+                        commands: commands.clone(),
+                    };
+                    turtle.procedures.push(procedure);
+                } else {
+                    exit_with_error(format!("Evaluation failed in procedure argument"));
+                }
+            }
+            Command::Procedure((name, args)) => {
+                if let Some(procedure) = turtle
+                    .procedures
+                    .clone()
+                    .iter()
+                    .find(|procedure| procedure.name == *name)
+                {
+                    let arg_names = procedure.args.clone();
+                    if args.len() != procedure.args.len() {
+                        exit_with_error(format!(
+                            "Error: Invalid amount of arguments for procedure '{name}'. Expected {}, received: {}",
+                            procedure.args.len(),
+                            args.len()
+                        ));
+                    }
+                    let evaluated_args = args
+                        .iter()
+                        .map(|arg| match evaluate_expression::<String>(turtle, arg) {
+                            Some(value) => value,
+                            None => {
+                                exit_with_error(format!(
+                                    "Error: Unable to parse args in procedure '{name}'"
+                                ));
+                                return "".to_string();
+                            }
+                        })
+                        .collect::<Vec<String>>();
+                    let original_variables = turtle.variables.clone();
+                    for (i, arg) in evaluated_args.iter().enumerate() {
+                        turtle.variables.push(Variable {
+                            name: arg_names[i].clone(),
+                            value: arg.to_string(),
+                        });
+                    }
+                    execute_commands(turtle, &procedure.commands, image);
+                    turtle.variables = original_variables;
+                } else {
+                    exit_with_error(format!("Error: unknown command '{name}'"));
+                }
+            }
         }
     }
 }
@@ -278,4 +337,5 @@ pub fn execute_commands(turtle: &mut Turtle, commands: &[Command], image: &mut I
     for command in commands {
         command.execute(turtle, image);
     }
+    // dbg!(turtle);
 }

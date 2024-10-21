@@ -13,15 +13,23 @@ pub struct Turtle {
     pub(crate) pos_x: i32,
     pub(crate) pos_y: i32,
     pub(crate) variables: Vec<Variable>,
+    pub(crate) procedures: Vec<Procedure>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Variable {
     pub(crate) name: String,
     pub(crate) value: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+pub struct Procedure {
+    pub(crate) name: String,
+    pub(crate) args: Vec<String>,
+    pub(crate) commands: Vec<Command>,
+}
+
+#[derive(Debug, Clone)]
 pub enum Command {
     PenUp,
     PenDown,
@@ -38,6 +46,8 @@ pub enum Command {
     AddAssign((Expression, Expression)),
     If((Expression, Vec<Command>)),
     While((Expression, Vec<Command>)),
+    To((String, Vec<Expression>, Vec<Command>)),
+    Procedure((String, Vec<Expression>)),
 }
 
 #[derive(Debug, Clone)]
@@ -109,6 +119,7 @@ impl Expression {
                     let right = Expression::from_tokens(tokens)?;
                     Some(Expression::Divide([Box::new(left), Box::new(right)]))
                 }
+                "[" => Some(Expression::Value("[".to_string())),
                 _ => {
                     if is_valid_value(token) {
                         Some(Expression::Value(token.to_string()))

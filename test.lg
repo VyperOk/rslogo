@@ -1,3 +1,8 @@
 pendown
-setpencolor / * "4 "2 "2
-FORWARD "100
+make "arg1 "test
+TO Foo :arg1 "arg2
+  FORWARD :test
+  left :arg2
+END
+
+Foo "10 "30

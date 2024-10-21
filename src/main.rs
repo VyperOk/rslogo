@@ -46,6 +46,7 @@ fn main() -> Result<(), ()> {
         pos_x: x / 2,
         pos_y: y / 2,
         variables: Vec::new(),
+        procedures: Vec::new(),
     };
     execute_commands(&mut turtle, &commands, &mut image);
 
