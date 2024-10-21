@@ -91,9 +91,9 @@ impl Command {
                             if let Ok(curr_value) = existing_variable.value.parse::<i32>() {
                                 existing_variable.value = (curr_value + validated_value).to_string()
                             } else {
-                                exit_with_error(format!(
-                                    "Error: cannot add parse variable value to integer"
-                                ));
+                                exit_with_error(
+                                    "Error: cannot add parse variable value to integer".to_string(),
+                                );
                             }
                         }
                     }
@@ -179,7 +179,7 @@ where
                 let quotient = left / right;
                 T::from_str(&quotient.to_string()).ok()
             } else {
-                exit_with_error(format!("Error: cannot divide by 0"));
+                exit_with_error("Error: cannot divide by 0".to_string());
                 None
             }
         }
@@ -187,7 +187,7 @@ where
             if let Some(value) = get_value_from_string::<T>(turtle, str.clone()) {
                 Some(value)
             } else {
-                exit_with_error(format!("Error: idk how you got here"));
+                exit_with_error("Error: idk how you got here".to_string());
                 None
             }
         }
