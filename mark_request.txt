@@ -9,7 +9,7 @@ Stages that are not complete should be left blank (like [ ]).
 > [X] Stage 1 (Pen Controls)
 > [X] Stage 2 (Variables + Queries)
 > [X] Stage 3 (If + While)
-> [ ] Stage 4 (The Stack)
+> [X] Stage 4 (The Stack)
 > [ ] Stage 5 (Procedures)
 
 ## Design Excellence
