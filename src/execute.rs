@@ -328,7 +328,7 @@ fn pen_move(image: &mut Image, turtle: &mut Turtle, heading: i32, length: i32) {
             turtle.pos_y = y;
         }
         Err(e) => {
-            eprintln!("{e}");
+            exit_with_error(e);
         }
     }
 }
@@ -337,5 +337,4 @@ pub fn execute_commands(turtle: &mut Turtle, commands: &[Command], image: &mut I
     for command in commands {
         command.execute(turtle, image);
     }
-    // dbg!(turtle);
 }
