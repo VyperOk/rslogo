@@ -26,6 +26,8 @@ pub mod tests {
         for path in logo_examples_out {
             file_outputs.push(path.unwrap().path());
         }
+        file_inputs.sort();
+        file_outputs.sort();
         for (i, file) in file_inputs.iter().enumerate() {
             let image_path: PathBuf = "result.svg".into();
             if let Ok(exp) = fs::read_to_string(file_outputs[i].clone()) {
