@@ -137,9 +137,16 @@ impl Expression {
     }
 }
 
+#[cfg(not(test))]
 pub fn exit_with_error(message: String) {
     eprintln!("{}", message);
     std::process::exit(1);
+}
+
+#[cfg(test)]
+pub fn exit_with_error(message: String) {
+    eprintln!("{}", message);
+    panic!("{}", message); // Use panic! instead of exit to allow for testing
 }
 
 pub fn is_valid_value(str: &str) -> bool {

@@ -90,10 +90,6 @@ impl Command {
                         {
                             if let Ok(curr_value) = existing_variable.value.parse::<i32>() {
                                 existing_variable.value = (curr_value + validated_value).to_string()
-                            } else {
-                                exit_with_error(
-                                    "Error: cannot add parse variable value to integer".to_string(),
-                                );
                             }
                         }
                     }
