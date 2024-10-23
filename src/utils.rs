@@ -1,6 +1,8 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, path::PathBuf};
 
-use unsvg::Color;
+use unsvg::{Color, Image, COLORS};
+
+use crate::{execute::execute_commands, parse::parse_commands};
 
 pub const VALUE_PREFIXES: [&str; 2] = ["\"", ":"];
 pub const QUERIES: [&str; 4] = ["XCOR", "YCOR", "HEADING", "COLOR"];
@@ -147,4 +149,46 @@ pub fn is_valid_value(str: &str) -> bool {
         return true;
     }
     false
+}
+
+pub fn save_image(image_path: PathBuf, image: Image) {
+    match image_path.extension().and_then(|s| s.to_str()) {
+        Some("svg") => {
+            let res = image.save_svg(&image_path);
+            if let Err(e) = res {
+                exit_with_error(format!("Error saving svg: {e}"));
+            }
+        }
+        Some("png") => {
+            let res = image.save_png(&image_path);
+            if let Err(e) = res {
+                exit_with_error(format!("Error saving png: {e}"));
+            }
+        }
+        _ => {
+            exit_with_error(format!("File extension not supported"));
+        }
+    }
+}
+
+pub fn start(file_path: PathBuf, image_path: PathBuf, width: u32, height: u32) -> Result<(), ()> {
+    let mut image = Image::new(width, height);
+
+    // Create turtle object
+    let dimensions = image.get_dimensions();
+    let (x, y) = (dimensions.0 as i32, dimensions.1 as i32);
+    let mut turtle = Turtle {
+        pen_down: false,
+        color: COLORS[7],
+        heading: 0,
+        pos_x: x / 2,
+        pos_y: y / 2,
+        variables: Vec::new(),
+        procedures: Vec::new(),
+    };
+
+    let commands = parse_commands(&file_path)?;
+    execute_commands(&mut turtle, &commands, &mut image);
+    save_image(image_path, image);
+    Ok(())
 }
