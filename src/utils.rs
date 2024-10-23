@@ -146,7 +146,7 @@ pub fn exit_with_error(message: String) {
 #[cfg(test)]
 pub fn exit_with_error(message: String) {
     eprintln!("{}", message);
-    panic!("{}", message); // Use panic! instead of exit to allow for testing
+    panic!("{}", message);
 }
 
 pub fn is_valid_value(str: &str) -> bool {
@@ -181,7 +181,6 @@ pub fn save_image(image_path: PathBuf, image: Image) {
 pub fn start(file_path: PathBuf, image_path: PathBuf, width: u32, height: u32) -> Result<(), ()> {
     let mut image = Image::new(width, height);
 
-    // Create turtle object
     let dimensions = image.get_dimensions();
     let (x, y) = (dimensions.0 as i32, dimensions.1 as i32);
     let mut turtle = Turtle {

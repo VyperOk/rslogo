@@ -2,7 +2,6 @@ use std::{collections::VecDeque, fs, path::Path, str::SplitWhitespace};
 
 use crate::utils::{exit_with_error, is_valid_value, Command, Expression};
 
-/// Opens File and reads lines, then sends to parse_lines to further interpret
 pub fn parse_commands(file_path: &Path) -> Result<Vec<Command>, ()> {
     let file = fs::read_to_string(file_path);
     let mut commands: Vec<Command> = Vec::new();
@@ -25,9 +24,6 @@ struct ExpectedToken {
     end: usize,
 }
 
-/// alters commands: Vec.
-/// takes raw lines from file and filters out comments and trims whitespace on either end
-/// Must add string match when adding new command
 fn parse_lines(
     lines: Vec<String>,
     mut i: usize,
@@ -130,7 +126,6 @@ fn parse_lines(
                             expected_token.end += 1;
                             i = parse_lines(lines.clone(), i + 1, &mut to_commands, expected_token)
                                 - 1;
-                            // Up to this now, must fill in args and implement execution logic
                             commands.push(Command::To((var_name.to_string(), args, to_commands)));
                         } else {
                             exit_with_error(format!(
@@ -164,7 +159,6 @@ fn parse_lines(
     i
 }
 
-/// Handles errors when reading individual command and returns args for each command
 fn get_args(
     cmd: &str,
     arg_size: Option<usize>,
@@ -173,9 +167,7 @@ fn get_args(
 ) {
     let remaining_args: Vec<&str> = words.collect();
     match arg_size {
-        // Handles case where there is a fixed number of arguments for the command
         Some(arg_count) => {
-            // Checks if there is the correct amount of args
             let tokens = &mut VecDeque::from(remaining_args);
             let mut i: usize = 0;
             while i < arg_count {
@@ -188,8 +180,6 @@ fn get_args(
                 exit_with_error(format!("Error: {} command has an invalid amount of arguments. Received {} arguments, expected {}", cmd, args.len() + tokens.len(), arg_count));
             }
         }
-        // Handles case where there is not a set number of arguments for the command
-        // returns the expression condition
         None => {
             let tokens = &mut VecDeque::from(remaining_args);
             while !tokens.is_empty() {

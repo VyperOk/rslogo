@@ -1,7 +1,3 @@
-// src/lib.rs
-
-// Include the code from main.rs for testing
-// Writing tests
 #[cfg(test)]
 pub mod tests {
     use std::{
