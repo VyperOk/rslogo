@@ -18,16 +18,29 @@ If you have completed a "design excellence" task, please write what
 the task was below (note, it MUST be on the list in the assignment or
 approved by COMP6991 staff).
 
->
+> The design excellence task that I have completed is getting 80% test coverage.
 
 Please write a paragraph or two (max. 250 words) describing how your design was
 influenced by this challenge, with specific reference to sections of your code.
 If you completed the "Pull Request" design excellence, please just leave a link
 to your PR.
 
->
->
->
+>  I used tarpaulin to do this. The way I did this is, I used the sample 
+implementation to generate the correct output as an svg, I then computed my 
+solution and asserted that these two files are equal. The way I implemented 
+errors was that the program would exit right away, to adapt to this in testing 
+I changed the function to panic iff the current instance is a test. This way 
+the program functions as normal and if it is a test then it will panic. I 
+mostly used the examples that were given, I also tested the error cases as 
+when I tested all cases if the program panic it would stop all other tests. So,
+I made a test suite for all the success cases which just loops through all the
+examples and if the expected is an error then it will skip it otherwise it will
+compare with the expected solution. I then manually wrote test cases for  the 
+example fail cases and then also added a few more cases of my own. My design 
+was influenced by this challenge as I had to think about how to adjust my code 
+to work for testing, as when I exit the program, it also exits the test, this 
+initally gave me some trouble until I thought I could use a seperate test 
+function which worked well.
 
 ## Design Limitations
 
@@ -35,11 +48,19 @@ If you made any design decisions which you now regret making; but don't to go ba
 let us know here. You can make up your design marks by acknowledging up to 5 things you would do
 differently now.
 
-> - TODO
+> Start with values as expressions from the beginning.
+> Maybe return an error instead if exitting the program instantly
 
 ## Other Comments
 
 If you want to let us know something else about your program, put it here!
 (Feel free to leave this blank)
 
-> TODO
+> I am not sure what is submitted to you when I submit, in my rslogo (outside of my src) I have a
+logo_examples_out folder and a tests folder which hold my files for testing in it. If you do not 
+have them I wrote a shell script to create them from vlab using 6991 rslogo. I have a private git
+repo that I can share with you if needed to show that it was completed before the due time if you
+dont have access to these folders in submittion. 
+
+> This was a really good assignment, I really enjoyed it, everything just went well like the 
+it was easy to progress through and I feel like the previous part helped me for the next.
